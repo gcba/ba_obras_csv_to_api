@@ -28,7 +28,13 @@ class CSV_To_API {
     }
 
     // Define a series of configuration variables based on what was requested in the query.
-    $this->source = isset( $query['source'] ) ? $this->esc_url( $query['source'] ) : null;
+    $this->dataset = isset( $query['dataset'] ) ? $query['dataset'] : null;
+    if($this->dataset){
+      $this->source = "https://recursos-data.buenosaires.gob.ar/ckan2/".$this->dataset."/".$this->dataset.".csv";
+    } else {
+      $this->source = null;
+    }
+
     $this->source_format = isset( $query['source_format'] ) ? $query['source_format'] : $this->get_extension( $this->source );
     $this->format = isset( $query['format'] ) ? $query['format'] : 'json';
     $this->callback = isset( $query['callback'] ) ? $this->jsonp_callback_filter( $query['callback'] ) : false;

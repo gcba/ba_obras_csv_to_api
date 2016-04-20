@@ -4,7 +4,7 @@
 require_once('class.csv-to-api.php');
 
 # No Source file is given, just show documentation
-if ( !isset( $_REQUEST['source'] ) ) {
+if ( !isset( $_REQUEST['dataset'] ) ) {
   echo "<PRE>";
   require "README.md";
   die();
