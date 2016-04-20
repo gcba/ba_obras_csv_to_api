@@ -10,6 +10,9 @@ class CSV_To_API {
   public $sort = null;
   public $sort_dir = null;
   public $data;
+  public $dataset_list_url = 'http://data.buenosaires.gob.ar/api/rest/dataset';
+  public $ckan_dataset_list;
+  public $ckan_dataset_source;
 
   /**
    * Use the query (often the requested URL) to define some settings.
@@ -29,8 +32,67 @@ class CSV_To_API {
 
     // Define a series of configuration variables based on what was requested in the query.
     $this->dataset = isset( $query['dataset'] ) ? $query['dataset'] : null;
+
     if($this->dataset){
-      $this->source = "https://recursos-data.buenosaires.gob.ar/ckan2/".$this->dataset."/".$this->dataset.".csv";
+      // Attempt to retrieve the data from cache
+      $key = 'ckan_dataset_list';
+      $this->ckan_dataset_list = $this->get_cache( $key );
+
+      if ( !$this->ckan_dataset_list ) {
+
+        // Retrieve the requested source material via HTTP GET.
+        if (ini_get('allow_url_fopen') == true) {
+          $this->dataset_list = file_get_contents( $this->dataset_list_url );
+        } else {
+          $this->dataset_list = $this->curl_get( $this->dataset_list_url );
+        }
+
+        $this->ckan_dataset_list = json_decode($this->dataset_list);
+
+        if ( !$this->ckan_dataset_list ) {
+          header( '502 Bad Gateway' );
+          die( 'Bad data source' );
+        }
+
+        $this->set_cache( $key, $this->ckan_dataset_list, $this->ttl );
+
+      }
+
+      if( in_array($this->dataset, $this->ckan_dataset_list) ){
+
+        // Attempt to retrieve the data from cache
+        $key = 'ckan_dataset_source_' . md5( $this->dataset );
+        $this->ckan_dataset_source = $this->get_cache( $key );
+
+        if ( !$this->ckan_dataset_source ) {
+
+          // Retrieve the requested source material via HTTP GET.
+          if (ini_get('allow_url_fopen') == true) {
+            $this->dataset_metadata = file_get_contents( $this->dataset_list_url.'/'.$this->dataset );
+          } else {
+            $this->dataset_metadata = $this->curl_get( $this->dataset_list_url.'/'.$this->dataset );
+          }
+
+          $this->dataset_metadata = json_decode($this->dataset_metadata);
+
+          $this->ckan_dataset_source = $this->dataset_metadata->download_url;
+
+          if ( !$this->ckan_dataset_source ) {
+            header( '502 Bad Gateway' );
+            die( 'Bad data source' );
+          }
+
+          $this->set_cache( $key, $this->ckan_dataset_source, $this->ttl );
+
+        }
+
+      }else{
+          header( '502 Bad Gateway' );
+          die( 'Dataset metadata name does not exist' );
+      }
+
+      $this->source = $this->ckan_dataset_source;
+
     } else {
       $this->source = null;
     }
