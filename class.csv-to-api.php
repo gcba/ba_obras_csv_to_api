@@ -82,6 +82,9 @@ class CSV_To_API {
             die( 'Bad data source' );
           }
 
+          var_dump($this->ckan_dataset_source);
+
+
           $this->set_cache( $key, $this->ckan_dataset_source, $this->ttl );
 
         }
@@ -290,9 +293,10 @@ class CSV_To_API {
     //php 5.3+
     if ( function_exists( 'str_getcsv' ) ) {
 
-      foreach ( $lines as &$line )
+      foreach ( $lines as &$line ){
+        $line = str_replace(";",",",$line);
         $line = str_getcsv( $line );
-
+      }
       //php 5.2
       // fgetcsv needs a file handle,
       // so write the string to a temp file before parsing

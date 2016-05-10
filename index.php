@@ -1,4 +1,6 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
 # Include Instant API's function library.
 require_once('class.csv-to-api.php');
