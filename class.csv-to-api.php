@@ -10,9 +10,6 @@ class CSV_To_API {
   public $sort = null;
   public $sort_dir = null;
   public $data;
-  public $dataset_list_url = 'http://data.buenosaires.gob.ar/api/rest/dataset';
-  public $ckan_dataset_list;
-  public $ckan_dataset_source;
 
   /**
    * Use the query (often the requested URL) to define some settings.
@@ -31,82 +28,14 @@ class CSV_To_API {
     }
 
     // Define a series of configuration variables based on what was requested in the query.
-    $this->dataset = isset( $query['dataset'] ) ? $query['dataset'] : null;
-
-    if($this->dataset){
-      // Attempt to retrieve the data from cache
-      $key = 'ckan_dataset_list';
-      $this->ckan_dataset_list = $this->get_cache( $key );
-
-      if ( !$this->ckan_dataset_list ) {
-
-        // Retrieve the requested source material via HTTP GET.
-        if (ini_get('allow_url_fopen') == true) {
-          $this->dataset_list = file_get_contents( $this->dataset_list_url );
-        } else {
-          $this->dataset_list = $this->curl_get( $this->dataset_list_url );
-        }
-
-        $this->ckan_dataset_list = json_decode($this->dataset_list);
-
-        if ( !$this->ckan_dataset_list ) {
-          header( '502 Bad Gateway' );
-          die( 'Bad data source' );
-        }
-
-        $this->set_cache( $key, $this->ckan_dataset_list, $this->ttl );
-
-      }
-
-      if( in_array($this->dataset, $this->ckan_dataset_list) ){
-
-        // Attempt to retrieve the data from cache
-        $key = 'ckan_dataset_source_' . md5( $this->dataset );
-        $this->ckan_dataset_source = $this->get_cache( $key );
-
-        if ( !$this->ckan_dataset_source ) {
-
-          // Retrieve the requested source material via HTTP GET.
-          if (ini_get('allow_url_fopen') == true) {
-            $this->dataset_metadata = file_get_contents( $this->dataset_list_url.'/'.$this->dataset );
-          } else {
-            $this->dataset_metadata = $this->curl_get( $this->dataset_list_url.'/'.$this->dataset );
-          }
-
-          $this->dataset_metadata = json_decode($this->dataset_metadata);
-
-          $this->ckan_dataset_source = $this->dataset_metadata->download_url;
-
-          if ( !$this->ckan_dataset_source ) {
-            header( '502 Bad Gateway' );
-            die( 'Bad data source' );
-          }
-
-          var_dump($this->ckan_dataset_source);
-
-
-          $this->set_cache( $key, $this->ckan_dataset_source, $this->ttl );
-
-        }
-
-      }else{
-          header( '502 Bad Gateway' );
-          die( 'Dataset metadata name does not exist' );
-      }
-
-      $this->source = $this->ckan_dataset_source;
-
-    } else {
-      $this->source = null;
-    }
-
+    $this->source = isset( $query['source'] ) ? $this->esc_url( $query['source'] ) : null;
     $this->source_format = isset( $query['source_format'] ) ? $query['source_format'] : $this->get_extension( $this->source );
     $this->format = isset( $query['format'] ) ? $query['format'] : 'json';
     $this->callback = isset( $query['callback'] ) ? $this->jsonp_callback_filter( $query['callback'] ) : false;
     $this->sort = isset( $query['sort'] ) ? $query['sort'] : null;
     $this->sort_dir = isset( $query['sort_dir'] ) ? $query['sort_dir'] : "desc";
     $this->header_row = isset( $query['header_row'] ) ? $query['header_row'] : "y";
-	
+  
     return get_object_vars( $this );
 
   }
@@ -248,20 +177,20 @@ class CSV_To_API {
     $lines = explode( "\n", $csv );
     $lines = $this->parse_lines( $lines );
     
-	// If no header row exists, automatically create field names.
-	if ($this->header_row == 'n') {
-	
-		for ($i=0; $i<count($lines[0]); $i++)
-		{
-			$headers[$i] = 'field-' . ($i+1);
-		}
-		
-	}
-	
-	// If a header row exists, use that as the headers.
-	else {
-	    $headers = array_shift( $lines );
-	}
+  // If no header row exists, automatically create field names.
+  if ($this->header_row == 'n') {
+  
+    for ($i=0; $i<count($lines[0]); $i++)
+    {
+      $headers[$i] = 'field-' . ($i+1);
+    }
+    
+  }
+  
+  // If a header row exists, use that as the headers.
+  else {
+      $headers = array_shift( $lines );
+  }
     
     $data = array();
     foreach ( $lines as $line ) {
@@ -293,10 +222,9 @@ class CSV_To_API {
     //php 5.3+
     if ( function_exists( 'str_getcsv' ) ) {
 
-      foreach ( $lines as &$line ){
-        $line = str_replace(";",",",$line);
+      foreach ( $lines as &$line )
         $line = str_getcsv( $line );
-      }
+
       //php 5.2
       // fgetcsv needs a file handle,
       // so write the string to a temp file before parsing
@@ -716,9 +644,9 @@ class CSV_To_API {
     $url = $this->_deep_replace($strip, $url);
     $url = str_replace(';//', '://', $url);
     /* If the URL doesn't appear to contain a scheme, we
-  	 * presume it needs http:// appended (unless a relative
-  	 * link starting with /, # or ? or a php file).
-  	 */
+     * presume it needs http:// appended (unless a relative
+     * link starting with /, # or ? or a php file).
+     */
     if ( strpos($url, ':') === false && ! in_array( $url[0], array( '/', '#', '?' ) ) &&
       ! preg_match('/^[a-z0-9-]+?\.php/i', $url) )
       $url = 'http://' . $url;

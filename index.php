@@ -1,12 +1,10 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
 
 # Include Instant API's function library.
 require_once('class.csv-to-api.php');
 
 # No Source file is given, just show documentation
-if ( !isset( $_REQUEST['dataset'] ) ) {
+if ( !isset( $_REQUEST['source'] ) ) {
   echo "<PRE>";
   require "README.md";
   die();
