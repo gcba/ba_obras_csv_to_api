@@ -1,5 +1,22 @@
 <?php
 
+function seems_utf8($Str) {
+    for ($i=0; $i<strlen($Str); $i++) {
+      if (ord($Str[$i]) < 0x80) continue; # 0bbbbbbb
+      elseif ((ord($Str[$i]) & 0xE0) == 0xC0) $n=1; # 110bbbbb
+      elseif ((ord($Str[$i]) & 0xF0) == 0xE0) $n=2; # 1110bbbb
+      elseif ((ord($Str[$i]) & 0xF8) == 0xF0) $n=3; # 11110bbb
+      elseif ((ord($Str[$i]) & 0xFC) == 0xF8) $n=4; # 111110bb
+      elseif ((ord($Str[$i]) & 0xFE) == 0xFC) $n=5; # 1111110b
+      else return false; # Does not match any model
+      for ($j=0; $j<$n; $j++) { # n bytes matching 10bbbbbb follow ?
+        if ((++$i == strlen($Str)) || ((ord($Str[$i]) & 0xC0) != 0x80))
+        return false;
+      }
+    }
+    return true;
+}
+
 class CSV_To_API {
 
   public $ttl = 3600;
@@ -198,7 +215,7 @@ class CSV_To_API {
       $row = array();
 
       foreach ( $line as $key => $field ) {
-        $row[ $this->sanitize_key( $headers[ $key ] ) ] = $field;
+        $row[ $this->sanitize_key( $headers[ $key ] ) ] = utf8_encode($field);
       }
 
       $row = array_filter( $row );
@@ -219,11 +236,16 @@ class CSV_To_API {
    */
   function parse_lines( $lines ) {
 
+    $comma = substr_count($lines[0],",");
+    $semicolon = substr_count($lines[0],";");
+
+    $delimiter = ($comma>$semicolon)?',':';';
+
     //php 5.3+
     if ( function_exists( 'str_getcsv' ) ) {
 
       foreach ( $lines as &$line )
-        $line = str_getcsv( $line );
+        $line = str_getcsv( $line , $delimiter );
 
       //php 5.2
       // fgetcsv needs a file handle,
@@ -235,7 +257,7 @@ class CSV_To_API {
       fseek( $fh, 0 );
       $lines = array();
 
-      while( $line = fgetcsv( $fh ) )
+      while( $line = fgetcsv( $fh, 0 , $delimiter ) )
         $lines[] = $line;
 
       fclose( $fh );
@@ -265,7 +287,6 @@ class CSV_To_API {
    * Turn a PHP object into JSON text.
    */
   function object_to_json( $data ) {
-
     return json_encode( $data );
 
   }
@@ -956,7 +977,6 @@ class CSV_To_API {
     return $title;
   }
 
-
   /**
    * Converts all accent characters to ASCII characters.
    *
@@ -975,6 +995,7 @@ class CSV_To_API {
       return $string;
 
     if (seems_utf8($string)) {
+    //if(true){
       $chars = array(
         // Decompositions for Latin-1 Supplement
         chr(194).chr(170) => 'a', chr(194).chr(186) => 'o',
