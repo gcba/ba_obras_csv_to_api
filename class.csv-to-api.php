@@ -215,7 +215,7 @@ class CSV_To_API {
       $row = array();
 
       foreach ( $line as $key => $field ) {
-        $row[ $this->sanitize_key( $headers[ $key ] ) ] = utf8_encode($field);
+        $row[ $this->sanitize_key( $headers[ $key ] ) ] = (seems_utf8($field))?$field:utf8_encode($field);
       }
 
       $row = array_filter( $row );
