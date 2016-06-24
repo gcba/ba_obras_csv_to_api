@@ -13,8 +13,10 @@ if ( !isset( $_REQUEST['source'] ) ) {
   die();
 }
 
+$config = include('config.php');
+
 # Create a new instance of the Instant API class.
-$api = new CSV_To_API();
+$api = new CSV_To_API($config);
 
 # Intercept the requested URL and use the parameters within it to determine what data to respond with.
 $api->parse_query();

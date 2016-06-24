@@ -1,0 +1,9 @@
+<?php
+
+	return array(
+	    'whitelist' => array(
+			'https://goo.gl',
+			'https://recursos-data.buenosaires.gob.ar'
+		)
+	);
+?>

@@ -19,6 +19,7 @@ function seems_utf8($Str) {
 
 class CSV_To_API {
 
+  public $config;
   public $ttl = 3600;
   public $source = null;
   public $source_format = null;
@@ -27,6 +28,10 @@ class CSV_To_API {
   public $sort = null;
   public $sort_dir = null;
   public $data;
+
+  function __construct($config) {
+    $this->config = $config;
+  }
 
   /**
    * Use the query (often the requested URL) to define some settings.
@@ -46,6 +51,12 @@ class CSV_To_API {
 
     // Define a series of configuration variables based on what was requested in the query.
     $this->source = isset( $query['source'] ) ? $this->esc_url( $query['source'] ) : null;
+      
+    if ( $this->source == null ) {
+      header( '400 Bad Request' );
+      die('Not whitelisted server');
+    }
+
     $this->source_format = isset( $query['source_format'] ) ? $query['source_format'] : $this->get_extension( $this->source );
     $this->format = isset( $query['format'] ) ? $query['format'] : 'json';
     $this->callback = isset( $query['callback'] ) ? $this->jsonp_callback_filter( $query['callback'] ) : false;
@@ -684,7 +695,13 @@ class CSV_To_API {
     if ( $this->kses_bad_protocol( $url, $protocols ) != $url )
       return '';
 
-    return $url;
+    //Chequeo whitelist
+    $server = substr($url,0,strpos($url,"/",8));
+    if(in_array($server, $this->config['whitelist'])){
+      return $url;
+    } else {
+      return null;
+    }
 
   }
 
