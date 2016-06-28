@@ -27,7 +27,8 @@ Usage
 -----
 
 1. Copy `class.csv-to-api.php` and `index.php` to your web server.
-2. Load a CSV file via the URL `index.php`, using the arguments below.
+2. Create a copy from `config.php.example` called `config.php` and add the allowed source domains.
+3. Load a CSV file via the URL `index.php`, using the arguments below. Example: <URL>?source=https://recursos-data.buenosaires.gob.ar/ckan2/interpretes/interpretes-lse.csv
 
 Arguments
 ---------
