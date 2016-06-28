@@ -21,7 +21,7 @@ Requirements
 ------------
 
 * PHP
-* APC (optional)
+* APC Cache
 
 Usage
 -----
