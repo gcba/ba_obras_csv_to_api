@@ -80,7 +80,7 @@ Usage
 Arguments
 ---------
 
-* `dataset`: the key of Dataset to the source CSV [Check here](http://data.buenosaires.gob.ar/api/rest/dataset)
+* `source`: source CSV url
 * `source_format`: if the url does not end in `.csv`, you should specify 'csv' here (to facilitate future functionality)
 * `format`: the requested return format, either `json`, `xml`, or `html` (default `json`)
 * `callback`: if JSON, an optional JSONP callback
