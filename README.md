@@ -1,7 +1,54 @@
+License
+-------
+GPLv3 or later.
+=======
+Bienvenido al Repositorio de Entregas de los proyectos a la ASI, denominado GIT.
+La definición de como se entrega y que documentos deben entregar se encuentra en la carpeta denominada "Instructivos-Documentos ASI" donde encontrarán un instructivo del GIT que explica el proceso y donde subir cada archivo. 
+Adicionalmente se encuentran los templates de guía para completar la documentación del proyecto para avanzar con las tareas y actividades de la ASI como Documento de Arquitectura, Manual de instalación, Documento de Alcance y funcionamiento, etc.
+
+Es obligatorio que contemplen que  el sistema operativo que deben utilizar es **RedHat 6.5**. Puede descargar la versión gratuita del mismo (Centos 6.5) desde el siguiente enlace [Descargar](https://github.com/2creatives/vagrant-centos/releases/download/v6.5.1/centos65-x86_64-20131205.box)
+
+Recuerden que **ninguno** de los ambientes productivos cuentan con acceso a internet. Si para el correcto funcionamiento de la aplicación es necesario comunicarse con servidores externos los mismos debe enumerarse en el manual de instalación indicando dominio/puerto que debe estar habilitado justificando su uso en cada caso. 
+
+NOTA:  La entrega por este medio no reemplaza los compromisos de entrega relacionado con la contratación,es decir, esto es un requerimiento obligatorio adicional a la entrega formal.
+
+------------------------------------------------------------------
+
+Descripción general
+===================
+
+Se trata de un simple script PHP que permite generar una API dinámicamente partiendo desde un archivo CSV en la web.
+
+Fue creado originalmente por miembros de la Casa Blanca.
+
+Se le agregó una configuración de whitelist con los dominios permitidos, para evitar usos indebidos.
+
+Requerimientos
+------------
+
+* PHP
+* APC Cache (es opcional pero muy recomendado)
+* Salida a internet a los servidores configurados en config.php al momento de la configuración inicial.
+
+Implementación y Uso
+-----
+
+1. Clonar el proyecto en el servidor.
+2. Apuntar el web server o subdominio a la carpeta `source`, donde se encuentran los archivos:  `class.csv-to-api.php` y `index.php`.
+3. Crear una copia de `config.php.example` y llamarla `config.php` y luego modificar en este último agregando los dominios permitidos.
+4. Testear el correcto funcionamiento del script `index.php`, usando los parámetros abajo descriptos. Ejemplo: <URL>?source=https://recursos-data.buenosaires.gob.ar/ckan2/interpretes/interpretes-lse.csv
+
+------------------------------------------------------------------
+
+Readme del proyecto original:
+
+
 CSV to API
 ===========
 
+
 Dynamically generate RESTful APIs from static CSVs. Provides JSON, XML, and HTML.
+
 
 What Problem This Solves
 ------------------------
@@ -70,6 +117,3 @@ http://labs.data.gov/csv-to-api/?source=http://www.gsa.gov/dg/data_gov_bldg_star
 
 http://labs.data.gov/csv-to-api/?source=http://www.gsa.gov/dg/data_gov_bldg_star.csv&Region+Code=11
 
-License
--------
-GPLv3 or later.

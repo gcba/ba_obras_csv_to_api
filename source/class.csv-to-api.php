@@ -89,16 +89,21 @@ class CSV_To_API {
     if ( !$this->data ) {
 
       // Retrieve the requested source material via HTTP GET.
-      if (ini_get('allow_url_fopen') == true) {
-        $this->data = file_get_contents( $this->source );
-      }
-      else {
-        $this->data = $this->curl_get( $this->source );
-      }
+        if (ini_get('allow_url_fopen') == true) {
+          try{
+            $this->data = $this->file_contents( $this->source );
+          }catch(Exception $e){
+            header( '400 Bad Request' );
+            die('No server connection or bad data source');
+          }
+        }
+        else {
+          $this->data = $this->curl_get( $this->source );
+        }
 
       if ( !$this->data ) {
         header( '502 Bad Gateway' );
-        die( 'Bad data source' );
+        die( 'No source connection or bad data source' );
       }
 
       // Turn the raw file data (e.g. CSV) into a PHP array.
@@ -577,6 +582,15 @@ class CSV_To_API {
 
     $this->cache[$key] = $value;
 
+  }
+
+  function file_contents($path) {
+    $str = @file_get_contents($path);
+    if ($str === FALSE) {
+        throw new Exception("Cannot access '$path' to read contents.");
+    } else {
+        return $str;
+    }
   }
 
   function curl_get( $url ) {
