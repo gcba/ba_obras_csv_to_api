@@ -12,8 +12,12 @@ if ( !isset( $_REQUEST['source'] ) ) {
   require "README.md";
   die();
 }
-
-$config = include('config.php');
+if (file_exists(__DIR__.'/config.php' )){
+	$config = @require_once('config.php' );
+} else {
+	header( '501 Not Implemented' );
+	die('ERROR: Configuration file config.php is missing.');
+}
 
 # Create a new instance of the Instant API class.
 $api = new CSV_To_API($config);
