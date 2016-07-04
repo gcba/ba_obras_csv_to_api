@@ -20,7 +20,7 @@ function seems_utf8($Str) {
 class CSV_To_API {
 
   public $config;
-  public $ttl = 3600;
+  public $ttl = 900;
   public $source = null;
   public $source_format = null;
   public $format = null;
@@ -110,9 +110,17 @@ class CSV_To_API {
       $this->data = $this->$parser( $this->data );
 
       // Save the data to WordPress' cache via its Transients API.
-      $this->set_cache( $key, $this->data, $this->ttl );
+      $date = gmdate('D, d M Y H:i:s T');
 
+      $this->set_cache( $key, $this->data, $this->ttl );
+      $this->set_cache( $key.'_date', $date, $this->ttl );
+
+    } else {
+      $date = $this->get_cache( $key.'_date');
     }
+    
+    header('Last-Modified: '.$date);
+    header('Cache-Control: public,max-age='.$this->ttl.',s-maxage='.$this->ttl);
     
     $this->data = $this->query( $this->data );
     

@@ -14,7 +14,7 @@ NOTA:  La entrega por este medio no reemplaza los compromisos de entrega relacio
 
 ------------------------------------------------------------------
 
-Descripción general
+Descripción general del proyecto
 ===================
 
 Se trata de un simple script PHP que permite generar una API dinámicamente partiendo desde un archivo CSV en la web.
