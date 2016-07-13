@@ -593,6 +593,7 @@ class CSV_To_API {
   }
 
   function file_contents($path) {
+    $path = str_replace("%3A",":",implode("/",array_map("rawurlencode",explode("/",$path))));
     $str = @file_get_contents($path);
     if ($str === FALSE) {
         throw new Exception("Cannot access '$path' to read contents.");
@@ -605,6 +606,7 @@ class CSV_To_API {
     if ( !isset($url) ) {
       return false;
     }
+    $url = str_replace ( ' ', '%20', $url );
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 1);
     curl_setopt($ch, CURLOPT_TIMEOUT_MS, 1200);
@@ -693,7 +695,8 @@ class CSV_To_API {
 
     if ( '' == $url )
       return $url;
-    $url = preg_replace('|[^a-z0-9-~+_.?#=!&;,/:%@$\|*\'()\\x80-\\xff]|i', '', $url);
+
+    $url = preg_replace('|[^a-z0-9-~+_.?#=!&;,/:%@$\|*\'()\\x80-\\xff/\s+/]|i', '', $url);
     $strip = array('%0d', '%0a', '%0D', '%0A');
     $url = $this->_deep_replace($strip, $url);
     $url = str_replace(';//', '://', $url);
